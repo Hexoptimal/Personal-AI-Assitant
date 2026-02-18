@@ -1,0 +1,83 @@
+version: "3.8"
+
+networks:
+  # Ollama <-> OpenWebUI only (no host / no internet)
+  private_ollama:
+    name: private_ollama
+    internal: true
+
+  # OpenWebUI <-> Nginx Proxy Manager
+  openwebgui_private:
+    external: true
+
+  # OpenWebUI outbound internet access only
+  openwebgui_internet:
+    driver: bridge
+
+    # Ollama outbound internet access only
+  ollama_internet:
+    driver: bridge
+
+services:
+  ollama:
+    image: ollama/ollama:latest
+    container_name: ollama
+    restart: unless-stopped
+    tty: true
+    shm_size: 1gb
+
+    volumes:
+      - /home/hex/media/files/youtube/ollama:/root/.ollama
+
+    environment:
+      - OLLAMA_KEEP_ALIVE=24h
+
+    networks:
+      - private_ollama
+      - ollama_internet
+    # NO ports exposed
+    # NO internet access
+
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: all
+              capabilities: [gpu]
+
+  ollama-webui:
+    image: ghcr.io/open-webui/open-webui:cuda126
+    container_name: ollama-webui
+    restart: unless-stopped
+    shm_size: 1gb
+
+    depends_on:
+      - ollama
+
+    volumes:
+      - /home/hex/media/files/youtube/ollama/ollama-webui:/app/backend/data
+
+    environment:
+      - OLLAMA_BASE_URLS=http://ollama:11434
+      - ENV=prod
+      - WEBUI_AUTH=True
+      - WEBUI_NAME=Hexoptimal-ollama AI
+      - WEBUI_URL=https://ollama.yourdomain.com
+      - WEBUI_SECRET_KEY=SECRETKEY
+      - USE_CUDA_DOCKER=True
+
+    networks:
+      - private_ollama
+      - openwebgui_private
+      - openwebgui_internet
+
+    # NO ports exposed — HTTPS only via reverse proxy
+
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: all
+              capabilities: [gpu]
