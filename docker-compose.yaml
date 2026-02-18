@@ -27,7 +27,7 @@ services:
     shm_size: 1gb
 
     volumes:
-      - /home/hex/media/files/youtube/ollama:/root/.ollama
+      - /YOURFOLDER/ollama:/root/.ollama
 
     environment:
       - OLLAMA_KEEP_ALIVE=24h
@@ -56,15 +56,15 @@ services:
       - ollama
 
     volumes:
-      - /home/hex/media/files/youtube/ollama/ollama-webui:/app/backend/data
+      - /YOURFOLDER/ollama/ollama-webui:/app/backend/data
 
     environment:
       - OLLAMA_BASE_URLS=http://ollama:11434
       - ENV=prod
       - WEBUI_AUTH=True
-      - WEBUI_NAME=Hexoptimal-ollama AI
+      - WEBUI_NAME=YOUR AI NAME
       - WEBUI_URL=https://ollama.yourdomain.com
-      - WEBUI_SECRET_KEY=SECRETKEY
+      - WEBUI_SECRET_KEY=YOURSECRETKEY
       - USE_CUDA_DOCKER=True
 
     networks:
