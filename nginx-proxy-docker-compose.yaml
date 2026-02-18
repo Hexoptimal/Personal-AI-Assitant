@@ -1,0 +1,28 @@
+version: "3.9"
+
+networks:
+  outside_net:
+    external: true
+
+  openwebgui_private:
+    name: openwebgui_private
+    internal: true
+
+services:
+  nginx:
+    image: jc21/nginx-proxy-manager:latest
+    restart: unless-stopped
+
+    networks:
+      - outside_net
+      - openwebgui_private
+
+    ports:
+      - "80:80"
+      - "81:81"
+      - "443:443"
+
+    volumes:
+      - /YOURFOLDER/data:/data
+      - /YOURFOLDER/letsencrypt:/etc/letsencrypt
+      - /YOURFOLDER/NGINX/snippets:/snippets
